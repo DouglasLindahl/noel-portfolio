@@ -1,34 +1,57 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react';
+import { useQuery } from 'graphql-hooks';
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const PORTFOLIOITEM_QUERY = `
+query{
+  allPortfolioItems{
+    id
+    title
+    image{
+      url
+    }
+    placeholderImage{
+      url
+    }
+    info
+  }
+}
+`;
 
+
+function App() {
+  const { data, loading, error } = useQuery(PORTFOLIOITEM_QUERY);
+
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+  
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="portfolioItemContainer">
+      {data.allPortfolioItems.map((portfolioItem) => (
+        <div className="portfolioItem" key={portfolioItem.id}>
+  <h1>{portfolioItem.title}</h1>
+  <div
+    className="image-container"
+    onMouseEnter={(e) => {
+      e.currentTarget.querySelector('.image').src = portfolioItem.image.url;
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.querySelector('.image').src = portfolioItem.placeholderImage.url;
+    }}
+  >
+    <img src={portfolioItem.placeholderImage.url} alt="" className="image" />
+  </div>
+</div>
+
+      ))}
+    </div>
   )
 }
 
